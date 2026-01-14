@@ -1,0 +1,163 @@
+02/12/2025
+    Se intentó instalar pdo_sqlite para corregir el error: 
+        There are configuration problems present which need to be fixed:
+        Try adding your current top level domain to the DebugKit.safeTld config and reload.
+        You need to install the PHP extension pdo_sqlite so DebugKit can work properly.    
+    Pero como el servidor del colegio tiene Debian 10, el repositorio ya no existe. Habría que seguir investigando para poder instalar Debian 10, pero como realmente eso será un ambiente de producción, no gastaré tiempo en ello. Ignoraré eso error y sigo adelante con la migración
+    Voy a revertir el cambio zend.assertions a -1 (producción):
+        cd /etc/php/8.2/fpm
+        sudo nano php.ini
+        Cambiar el valor de zend.assertions a -1
+        sudo systemctl restart php8.2-fpm
+    Quedan entonces nuevamente los warnings, pero los ignoraré porque el servidor será el ambiente de producción:
+        You should set zend.assertions to 1 in your php.ini for your development environment.
+        There are configuration problems present which need to be fixed:
+        Try adding your current top level domain to the DebugKit.safeTld config and reload.
+        You need to install the PHP extension pdo_sqlite so DebugKit can work properly.
+        Ya no se seguirá escribiendo en este archivo, porque ya están configurado el proyecto tamto en mi pc en lampp como en el servidor Vesta del colegio. Se seguirá documentando en el archvio historia_sistema.txt
+29/11/2025
+    El proyecto en el ambiente lampp local funciona perfectamente
+    En el servidor de desarrollo aún hay que resolver el error:
+        There are configuration problems present which need to be fixed:
+        Try adding your current top level domain to the DebugKit.safeTld config and reload.
+        You need to install the PHP extension pdo_sqlite so DebugKit can work properly.
+        Aunque el servidor de desarrollo luego se convertirá en desarrollo de producción, igual se instala esa extensión
+
+
+30/10/2025 
+    Se conectó exitosamente la base de datos.
+29/10/2025
+    En el archivo /opt/lampp/phpmyadmin/config.inc.php se agregó al final la línea: $cfg['ExecTimeLimit'] = 0;
+    Se restauró la base de datos exitosamente
+
+23/10/20215
+En el archivo /opt/lampp/etc/php.ini se modificaron los siguientes valores:
+    upload_max_filesize	800M	Límite para el tamaño de un archivo subido.
+    post_max_size	850M	Límite para todos los datos de un POST (debe ser mayor que upload_max_filesize).
+    memory_limit	900M	Límite de memoria que puede consumir un script (debe ser mayor que post_max_size).
+    max_execution_time	0	Tiempo máximo que se permite la ejecución de un script. 0 significa ilimitado.
+    max_input_time	0	Tiempo máximo que un script puede tardar en analizar los datos de entrada. 0 significa ilimitado.
+
+Se verificó si el archivo /opt/lampp/phpmyadmin/config.inc.php tenía definido el atributo $cfg['ExecTimeLimit'] para cambiarlo a "0" (ilimitado), pero no está definido ese atributo.
+
+Falta probar restaurar la base de datos del colegio el localhost/phpmyadmin
+
+20/10/2025
+Configuración en el ambiente local lampp
+cd cd /opt/lampp/etc
+sudo nano php.ini
+Cambiar zend.assertions a 1:
+[Assertion]
+; Switch whether to compile assertions at all (to have no overhead at run-time)
+; -1: Do not compile at all
+;  0: Jump over assertion at run-time
+;  1: Execute assertions
+; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.asse>
+; Default Value: 1
+; Development Value: 1
+; Production Value: -1
+; http://php.net/zend.assertions
+zend.assertions=1
+
+Ahora falta configurar phpmyadmin y restaurar la base de datos. En el archivo gemini_conversaciones está el procedimiento para configurar php.ini
+
+17/10/2025
+En el servidor vestacp se intentó eliminar la advertencia: There are configuration problems present which need to be fixed:
+Try adding your current top level domain to the DebugKit.safeTld config and reload.
+You need to install the PHP extension pdo_sqlite so DebugKit can work properly. Pero no se pudo
+Se descargó el proyecto en lampp, arrancó bien. Hay que restaurar y conectar la base de datos
+Se debe configurar phpmyadmin para que permita importar bases de datos de más de 100 mb y la duración de la ejecución de script de php que sea ilimitada
+Los módulos nuevos y actualización de los existentes, así como pruebas iniciales se harán en el ambiente lampp
+
+15/10/2025
+Se conectó la base de datos en el archivo app_local.php
+    'username' => 'angeltest_sangabriel',
+    'password' => 'Csgamysql2021$',
+
+    'database' => 'angeltest_sangabriel',
+
+Está pendiente: 
+    Corregir la advertencia: There are configuration problems present which need to be fixed:
+    Try adding your current top level domain to the DebugKit.safeTld config and reload.
+    You need to install the PHP extension pdo_sqlite so DebugKit can work properly.
+    Utilizar la plantilla web cake-82
+
+14/10/2025
+
+Se agregó el usuario ang3l al usuario www-data:
+    sudo usermod -a -G www-data ang3l
+
+Se ejecutó:
+cd /home/angeltest/web/dev.colegiosangabrielarcangel.com/public_html
+composer create-project --prefer-dist cakephp/app:~5.0 sistemasangabriel
+
+Se cambió el propietario de la carpeta sistemasangabriel a angeltest:
+
+sudo chown -R angeltest:www-data /home/angeltest/web/dev.colegiosangabrielarcangel.com/public_html/sistemasangabriel
+
+Se movió el contenido de la carpeta sistemasangabriel a public_html
+
+Se arrancó la aplicación en el navegador
+
+Los estilos no se mostraron bien, se agregó webroot en el archivo app.php:
+
+'App' => [
+    'namespace' => 'App',
+    'encoding' => env('APP_ENCODING', 'UTF-8'),
+    'defaultLocale' => env('APP_DEFAULT_LOCALE', 'en_US'),
+    'defaultTimezone' => env('APP_DEFAULT_TIMEZONE', 'UTC'),
+    'base' => false,
+    'dir' => 'src',
+    'webroot' => 'webroot',
+    'wwwRoot' => WWW_ROOT,
+    //'baseUrl' => env('SCRIPT_NAME'),
+    'fullBaseUrl' => false,
+    'imageBaseUrl' => 'webroot/img/',
+    'cssBaseUrl' => 'webroot/css/',
+    'jsBaseUrl' => 'webroot/js/',
+    'paths' => [
+        'plugins' => [ROOT . DS . 'plugins' . DS],
+        'templates' => [ROOT . DS . 'templates' . DS],
+        'locales' => [RESOURCES . 'locales' . DS],
+    ],
+
+Se refrescó la página, todo perfecto
+
+Ya la base de datos había sido restaurada anteriormente en la antigua instalación de Cakephp 
+
+Se intentó usar la plantilla php-fpm-84 pero daba error, así que se dejó la plantlla php-fpm-82
+
+En la anterior intalación de Cakephp 5.1 se había modificado el archivo: cd php/8.2/fpm/php.ini porque la instalación mostraba un warning que debía cambiarse a modo desarrollo. Para esto se hizo lo siguiente en esa oportunidad: 
+
+Se agregó un phpinfo() a la página de bienvenida del proyecto: templates/Page/home.php
+
+<?php
+phpinfo();
+?>
+
+Se recargó la página y se buscó el valor de "Loaded Configuration File":
+    /etc/php/8.2/fpm/php.ini
+
+cd /etc/php/8.2/fpm
+sudo nano php.ini
+Se cambió el valor de: zend.assertions a 1:
+[Assertion]
+; Switch whether to compile assertions at all (to have no overhead at run-time)
+; -1: Do not compile at all
+;  0: Jump over assertion at run-time
+;  1: Execute assertions
+; Changing from or to a negative value is only possible in php.ini! (For turning assertions on and off at run-time, see assert.active, when zend.asse>
+; Default Value: 1
+; Development Value: 1
+; Production Value: -1
+; http://php.net/zend.assertions
+
+zend.assertions = 1
+
+Se reinició apache desde el escritorio de vestacp
+Se ejecutó: 
+sudo systemctl restart php8.2-fpm
+
+Recargué la página y todo ok
+
+Recordar que este es un ambiente por los momentos de desarrollo, pero luego será de producción. Cuando se instale la aplicación en producción se debe re-establecer el valor a -1
