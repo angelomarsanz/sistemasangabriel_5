@@ -51,3 +51,6 @@ nbproject/*
 # yarn
 yarn-debug.log
 yarn-error.log
+
+# Documentación del proyecto
+/documentacion/
